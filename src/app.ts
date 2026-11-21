@@ -22,10 +22,19 @@ import {
 } from "fastify-type-provider-zod";
 import type { Db } from "./db/client.js";
 import type { Env } from "./env.js";
+import { projectAttachmentRoutes } from "./features/attachments/project-routes.js";
+import { createAttachmentsRepository } from "./features/attachments/repository.js";
 import { attachmentRoutes } from "./features/attachments/routes.js";
-import { createExamplesRepository } from "./features/examples/repository.js";
-import { exampleRoutes } from "./features/examples/routes.js";
-import { createExamplesService } from "./features/examples/service.js";
+import { createAttachmentsService } from "./features/attachments/service.js";
+import { createMilestonesRepository } from "./features/milestones/repository.js";
+import { milestoneRoutes } from "./features/milestones/routes.js";
+import { createMilestonesService } from "./features/milestones/service.js";
+import { createProjectsRepository } from "./features/projects/repository.js";
+import { projectRoutes } from "./features/projects/routes.js";
+import { createProjectsService } from "./features/projects/service.js";
+import { createTasksRepository } from "./features/tasks/repository.js";
+import { taskRoutes } from "./features/tasks/routes.js";
+import { createTasksService } from "./features/tasks/service.js";
 
 /** App copy that complements the kit's `MESSAGES`. */
 export const MESSAGES_APP = {
@@ -87,7 +96,7 @@ export async function buildApp(opts: BuildAppOptions): Promise<FastifyInstance> 
   // #region handbook:app-wiring
   // Registered first so it sees every route (`pnpm openapi` writes the spec).
   await app.register(swagger, {
-    openapi: { info: { title: "Monexa API", version } },
+    openapi: { info: { title: "Project Tracker API", version } },
     transform: jsonSchemaTransform,
   });
   await app.register(requestId);
@@ -128,14 +137,30 @@ export async function buildApp(opts: BuildAppOptions): Promise<FastifyInstance> 
   await app.register(health, { checks: { db: () => opts.db.execute(sql`select 1`) } });
   // #endregion
 
-  await app.register(exampleRoutes, {
-    service: createExamplesService(createExamplesRepository(opts.db)),
-  });
-
+  const presigner = opts.presigner ?? presignerFromEnv(env);
   await app.register(attachmentRoutes, {
-    presigner: opts.presigner ?? presignerFromEnv(env),
+    presigner,
     maxBytes: env.UPLOAD_MAX_BYTES,
     allowedTypes: env.UPLOAD_ALLOWED_TYPES,
+  });
+
+  const projectsRepo = createProjectsRepository(opts.db);
+  const milestonesRepo = createMilestonesRepository(opts.db);
+  await app.register(projectRoutes, { service: createProjectsService(projectsRepo) });
+  await app.register(milestoneRoutes, {
+    service: createMilestonesService(milestonesRepo, projectsRepo),
+  });
+  await app.register(taskRoutes, {
+    service: createTasksService(createTasksRepository(opts.db), milestonesRepo, projectsRepo),
+  });
+
+  await app.register(projectAttachmentRoutes, {
+    service: createAttachmentsService(
+      createAttachmentsRepository(opts.db),
+      presigner,
+      milestonesRepo,
+      projectsRepo
+    ),
   });
 
   const { closeDb } = opts;

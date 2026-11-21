@@ -1,6 +1,6 @@
-# Monexa API Template
+# Project Tracker API
 
-The backend half of a Monexa app. It pairs with `monexa-app-template`, the Next.js frontend. The stack is Fastify 5 on [`@mono/server-kit`](../mono-server-kit), with:
+The backend of the Project Tracker app, built from `monexa-api-template`. It pairs with the Next.js frontend in `project-tracker`. The stack is Fastify 5 on [`@mono/server-kit`](../mono-server-kit), with:
 - central OIDC auth, RBAC and the response envelope;
 - PostgreSQL + Drizzle;
 - Zod schemas as the single source for validation, serialization and OpenAPI;
@@ -25,17 +25,21 @@ pnpm db:migrate
 pnpm dev                     # http://localhost:8080
 ```
 
-To run it with the FE template, set `API_BASE_URL=http://localhost:8080` in its `.env` and log in as `admin` / `admin123`, which grants `example:all`. A second user, `viewer` / `viewer123`, has view-only access. Edit `dev/issuer.json` to add users or permissions.
+To run it with the FE template, set `API_BASE_URL=http://localhost:8080` in its `.env` and client `project-tracker`, log in as `pm` / `pm123` (Project Manager, `project:all`), `member` / `member123` (Team Member) or `client` / `client123` (Client). All belong to the dev org "PT Contoh Klien". Edit `dev/issuer.json` to add users or permissions.
+
+## Tenancy
+
+Every table has `org_id` and every query filters by the token's `org_id` (see `src/auth-context.ts`). A token without an org gets 403.
 
 ## New app from this template
 
 1. Copy the repo and rename `name` in `package.json`.
 2. Register a client for the app in the central auth service and grant its permissions there.
-3. Set the env vars below, then delete or replace `src/features/examples`.
+3. Set the env vars below, then add your features under `src/features/`.
 
 ## Adding a feature
 
-Copy `src/features/examples`:
+Follow the layering below:
 
 | File            | Holds                                                            |
 | --------------- | ---------------------------------------------------------------- |
@@ -54,24 +58,24 @@ In routes that have a response schema, **call** `reply.ok(...)` and don't `retur
 
 ## Environment
 
-| Variable                                              | Default                  | Notes                                                                                                                                                                                                |
-| ----------------------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `PORT`                                                | `8080`                   |                                                                                                                                                                                                      |
-| `LOG_LEVEL`                                           | `info`                   |                                                                                                                                                                                                      |
-| `DATABASE_URL`                                        | required                 | On Vercel, use a pooler (PgBouncer transaction mode or the provider's pooler)                                                                                                                        |
-| `DB_POOL_MAX`                                         | `10`                     | Use 1–3 on Vercel                                                                                                                                                                                    |
-| `AUTH_MODE`                                           | required                 | `credentials` or `sso`                                                                                                                                                                               |
-| `AUTH_ISSUER`, `AUTH_CLIENT_ID`, `AUTH_CLIENT_SECRET` | required                 | The central OIDC client for this app                                                                                                                                                                 |
-| `AUTH_REDIRECT_URIS`                                  | –                        | `sso`: comma-separated FE callback URLs                                                                                                                                                              |
-| `AUTH_IDP_HINT`                                       | –                        | `sso`: e.g. `google`                                                                                                                                                                                 |
-| `AUTH_POST_LOGOUT_REDIRECT_URI`                       | –                        | `sso`: where global logout returns to                                                                                                                                                                |
-| `CORS_ORIGINS`                                        | –                        | Comma-separated. Leave empty for no CORS, since the FE calls this API from the server                                                                                                                |
-| `RATE_LIMIT_MAX` / `LOGIN_RATE_LIMIT_MAX`             | `300` / `10`             | Per minute. Keyed by user when authenticated, by username on `/v1/auth/login`, and by client IP otherwise. The login limit also covers `/v1/auth/callback`. `/health` and `/ready` are never limited |
-| `TRUST_PROXY`                                         | `false`                  | Set to `true` behind a proxy that sets `X-Forwarded-For` (load balancer, Vercel), so anonymous limits use the real client IP                                                                         |
-| `S3_BUCKET`, `S3_REGION`                              | required                 |                                                                                                                                                                                                      |
-| `S3_ENDPOINT`, `S3_FORCE_PATH_STYLE`                  | – / `false`              | For S3-compatible storage such as MinIO                                                                                                                                                              |
-| `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`            | –                        | Set both or neither. With neither, the AWS credential chain is used                                                                                                                                  |
-| `UPLOAD_MAX_BYTES`, `UPLOAD_ALLOWED_TYPES`            | `10485760`, pdf/jpeg/png | Limits for presigned uploads                                                                                                                                                                         |
+| Variable                                              | Default                                | Notes                                                                                                                                                                                                |
+| ----------------------------------------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PORT`                                                | `8080`                                 |                                                                                                                                                                                                      |
+| `LOG_LEVEL`                                           | `info`                                 |                                                                                                                                                                                                      |
+| `DATABASE_URL`                                        | required                               | On Vercel, use a pooler (PgBouncer transaction mode or the provider's pooler)                                                                                                                        |
+| `DB_POOL_MAX`                                         | `10`                                   | Use 1–3 on Vercel                                                                                                                                                                                    |
+| `AUTH_MODE`                                           | required                               | `credentials` or `sso`                                                                                                                                                                               |
+| `AUTH_ISSUER`, `AUTH_CLIENT_ID`, `AUTH_CLIENT_SECRET` | required                               | The central OIDC client for this app                                                                                                                                                                 |
+| `AUTH_REDIRECT_URIS`                                  | –                                      | `sso`: comma-separated FE callback URLs                                                                                                                                                              |
+| `AUTH_IDP_HINT`                                       | –                                      | `sso`: e.g. `google`                                                                                                                                                                                 |
+| `AUTH_POST_LOGOUT_REDIRECT_URI`                       | –                                      | `sso`: where global logout returns to                                                                                                                                                                |
+| `CORS_ORIGINS`                                        | –                                      | Comma-separated. Leave empty for no CORS, since the FE calls this API from the server                                                                                                                |
+| `RATE_LIMIT_MAX` / `LOGIN_RATE_LIMIT_MAX`             | `300` / `10`                           | Per minute. Keyed by user when authenticated, by username on `/v1/auth/login`, and by client IP otherwise. The login limit also covers `/v1/auth/callback`. `/health` and `/ready` are never limited |
+| `TRUST_PROXY`                                         | `false`                                | Set to `true` behind a proxy that sets `X-Forwarded-For` (load balancer, Vercel), so anonymous limits use the real client IP                                                                         |
+| `S3_BUCKET`, `S3_REGION`                              | required                               |                                                                                                                                                                                                      |
+| `S3_ENDPOINT`, `S3_FORCE_PATH_STYLE`                  | – / `false`                            | For S3-compatible storage such as MinIO                                                                                                                                                              |
+| `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`            | –                                      | Set both or neither. With neither, the AWS credential chain is used                                                                                                                                  |
+| `UPLOAD_MAX_BYTES`, `UPLOAD_ALLOWED_TYPES`            | `26214400`, PDF/images/Office/zip/text | Limits for presigned uploads                                                                                                                                                                         |
 
 An empty value counts as unset. A bad env fails at boot, and the error names the keys but never their values.
 

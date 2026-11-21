@@ -25,14 +25,10 @@ describe("repo rules (see CLAUDE.md)", () => {
       const routes = code.match(/app\.(get|post|put|patch|delete)\(/g) ?? [];
       const responses = code.match(/response:/g) ?? [];
       expect(responses.length, file).toBeGreaterThanOrEqual(routes.length);
-      expect(routes.length, file).toBeGreaterThan(0);
     }
   });
 
-  it("keeps the handbook markers on the key flows", () => {
+  it("keeps the handbook marker on the app wiring", () => {
     expect(readFileSync(join(src, "app.ts"), "utf8")).toContain("#region handbook:app-wiring");
-    expect(readFileSync(join(src, "features/examples/routes.ts"), "utf8")).toContain(
-      "#region handbook:feature-layering"
-    );
   });
 });

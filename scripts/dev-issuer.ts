@@ -7,4 +7,6 @@ const config = JSON.parse(readFileSync(new URL("../dev/issuer.json", import.meta
 const port = Number(process.env.DEV_ISSUER_PORT ?? 9000);
 const issuer = await createDevIssuer({ issuer: `http://localhost:${port}`, ...config });
 await issuer.listen({ port, host: "127.0.0.1" });
-console.log(`dev issuer on http://localhost:${port} (users: admin/admin123, viewer/viewer123)`);
+console.log(
+  `dev issuer on http://localhost:${port} (users: pm/pm123, member/member123, client/client123)`
+);

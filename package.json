@@ -1,8 +1,8 @@
 {
-  "name": "monexa-api-template",
+  "name": "project-tracker-api",
   "version": "0.1.0",
   "private": true,
-  "description": "Monexa backend template: Fastify on @mono/server-kit, Postgres/Drizzle, Docker + Vercel.",
+  "description": "Project Tracker backend: Fastify on @mono/server-kit, Postgres/Drizzle, org-scoped.",
   "type": "module",
   "packageManager": "pnpm@10.33.0",
   "engines": {
@@ -36,7 +36,7 @@
     "@fastify/rate-limit": "^11.3.0",
     "@fastify/swagger": "^9.9.5",
     "@mono/auth": "0.2.0",
-    "@mono/server-kit": "^0.1.0",
+    "@mono/server-kit": "^0.2.0",
     "drizzle-orm": "^0.45.4",
     "fastify": "^5.12.8",
     "fastify-type-provider-zod": "^7.0.0",
