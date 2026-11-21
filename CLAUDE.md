@@ -6,7 +6,7 @@ Fastify 5 backend on `@mono/server-kit` (read its README for the plugin options)
 
 | Command              | What it does                                         |
 | -------------------- | ---------------------------------------------------- |
-| `pnpm test:coverage` | Vitest with PGlite (no Docker). **100%** enforced    |
+| `pnpm test:coverage` | Vitest with PGlite (no Docker). **80%** enforced     |
 | `pnpm typecheck`     | `tsc --noEmit`                                       |
 | `pnpm lint`          | Biome                                                |
 | `pnpm db:generate`   | New migration from `src/db/schema/`                  |

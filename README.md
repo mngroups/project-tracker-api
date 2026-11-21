@@ -31,8 +31,6 @@ To run it with the FE template, set `API_BASE_URL=http://localhost:8080` in its 
 
 Every table has `org_id` and every query filters by the token's `org_id` (see `src/auth-context.ts`). A token without an org gets 403.
 
-> `@mono/server-kit` is installed from `vendor/mono-server-kit-0.2.0.tgz`; switch to `^0.2.0` from the registry once it is published.
-
 ## New app from this template
 
 1. Copy the repo and rename `name` in `package.json`.
