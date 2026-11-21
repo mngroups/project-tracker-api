@@ -1,0 +1,38 @@
+name: Migrate
+
+# Docker release step: apply migrations before rolling out a new image.
+# (Vercel deploys migrate in their build command; see scripts/vercel-build.sh.)
+# DATABASE_URL is a secret of the chosen GitHub environment.
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: GitHub environment holding DATABASE_URL
+        required: true
+        type: choice
+        options: [staging, production]
+
+permissions:
+  contents: read
+
+jobs:
+  migrate:
+    runs-on: ubuntu-24.04
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v6
+      - run: corepack enable
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Configure GitLab npm registry
+        env:
+          GITLAB_NPM_TOKEN: ${{ secrets.GITLAB_NPM_TOKEN }}
+          GITLAB_PACKAGE_GROUP_ID: ${{ vars.GITLAB_PACKAGE_GROUP_ID }}
+          NPMRC_PATH: ${{ runner.temp }}/.npmrc
+        run: sh scripts/write-npmrc.sh && echo "NPM_CONFIG_USERCONFIG=$RUNNER_TEMP/.npmrc" >> "$GITHUB_ENV"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:migrate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}

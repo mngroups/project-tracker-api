@@ -1,0 +1,23 @@
+{
+  "users": [
+    {
+      "username": "admin",
+      "password": "admin123",
+      "sub": "dev-admin",
+      "permissions": { "monexa-app": ["example:all"] }
+    },
+    {
+      "username": "viewer",
+      "password": "viewer123",
+      "sub": "dev-viewer",
+      "permissions": { "monexa-app": ["example.item:view"] }
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "monexa-app",
+      "clientSecret": "dev-secret",
+      "redirectUris": ["http://localhost:3000/auth/callback"]
+    }
+  ]
+}

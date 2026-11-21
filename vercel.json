@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "NPMRC_PATH=/tmp/.npmrc sh scripts/write-npmrc.sh && NPM_CONFIG_USERCONFIG=/tmp/.npmrc pnpm install --frozen-lockfile",
+  "buildCommand": "sh scripts/vercel-build.sh",
+  "outputDirectory": "public",
+  "rewrites": [{ "source": "/(.*)", "destination": "/api" }]
+}

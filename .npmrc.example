@@ -1,0 +1,8 @@
+# Used by `pnpm registry:run`; the resolved config is written to a temporary file.
+# Set GITLAB_PACKAGE_GROUP_ID and save a read_package_registry token in Keychain,
+# or provide GITLAB_NPM_TOKEN through your password manager.
+# (CI, Docker and Vercel use scripts/write-npmrc.sh instead.)
+@mono:registry=https://gitlab.com/api/v4/groups/${GITLAB_PACKAGE_GROUP_ID}/-/packages/npm/
+//gitlab.com/api/v4/groups/${GITLAB_PACKAGE_GROUP_ID}/-/packages/npm/:_authToken=${GITLAB_NPM_TOKEN}
+# Tarballs come from each package's project registry (projects/<id>/…); this prefix covers them all.
+//gitlab.com/api/v4/:_authToken=${GITLAB_NPM_TOKEN}
