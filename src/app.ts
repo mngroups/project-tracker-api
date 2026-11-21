@@ -23,9 +23,15 @@ import {
 import type { Db } from "./db/client.js";
 import type { Env } from "./env.js";
 import { attachmentRoutes } from "./features/attachments/routes.js";
+import { createMilestonesRepository } from "./features/milestones/repository.js";
+import { milestoneRoutes } from "./features/milestones/routes.js";
+import { createMilestonesService } from "./features/milestones/service.js";
 import { createProjectsRepository } from "./features/projects/repository.js";
 import { projectRoutes } from "./features/projects/routes.js";
 import { createProjectsService } from "./features/projects/service.js";
+import { createTasksRepository } from "./features/tasks/repository.js";
+import { taskRoutes } from "./features/tasks/routes.js";
+import { createTasksService } from "./features/tasks/service.js";
 
 /** App copy that complements the kit's `MESSAGES`. */
 export const MESSAGES_APP = {
@@ -134,8 +140,14 @@ export async function buildApp(opts: BuildAppOptions): Promise<FastifyInstance> 
     allowedTypes: env.UPLOAD_ALLOWED_TYPES,
   });
 
-  await app.register(projectRoutes, {
-    service: createProjectsService(createProjectsRepository(opts.db)),
+  const projectsRepo = createProjectsRepository(opts.db);
+  const milestonesRepo = createMilestonesRepository(opts.db);
+  await app.register(projectRoutes, { service: createProjectsService(projectsRepo) });
+  await app.register(milestoneRoutes, {
+    service: createMilestonesService(milestonesRepo, projectsRepo),
+  });
+  await app.register(taskRoutes, {
+    service: createTasksService(createTasksRepository(opts.db), milestonesRepo, projectsRepo),
   });
 
   const { closeDb } = opts;

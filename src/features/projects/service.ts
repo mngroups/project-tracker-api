@@ -47,7 +47,7 @@ const toListItem = (row: ProjectRow, c: Counts): ProjectListItem => ({
   updated_at: row.updatedAt.toISOString(),
 });
 
-const toTask = (t: TaskRow): TaskItem => ({
+export const toTask = (t: TaskRow): TaskItem => ({
   id: t.id,
   milestone_id: t.milestoneId,
   title: t.title,
@@ -58,7 +58,7 @@ const toTask = (t: TaskRow): TaskItem => ({
   is_internal: t.isInternal,
 });
 
-const toMilestone = (m: MilestoneRow, tasks: TaskRow[]): MilestoneItem => ({
+export const toMilestone = (m: MilestoneRow, tasks: TaskRow[]): MilestoneItem => ({
   id: m.id,
   title: m.title,
   description: m.description,
