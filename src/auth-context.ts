@@ -14,7 +14,7 @@ export type Caller = {
 };
 
 /** Every query is scoped to `orgId`: never read or write outside it. */
-export function callerOf(user: AuthUser | undefined): Caller {
+export function callerOf(user: AuthUser | null | undefined): Caller {
   if (!user?.orgId) throw new AppError(403, MESSAGE_NO_ORG);
   const canManage = isGranted(user.permissions, PERMISSIONS.manage);
   const { name, preferred_username: username } = user.claims;

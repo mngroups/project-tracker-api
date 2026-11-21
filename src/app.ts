@@ -23,6 +23,9 @@ import {
 import type { Db } from "./db/client.js";
 import type { Env } from "./env.js";
 import { attachmentRoutes } from "./features/attachments/routes.js";
+import { createProjectsRepository } from "./features/projects/repository.js";
+import { projectRoutes } from "./features/projects/routes.js";
+import { createProjectsService } from "./features/projects/service.js";
 
 /** App copy that complements the kit's `MESSAGES`. */
 export const MESSAGES_APP = {
@@ -129,6 +132,10 @@ export async function buildApp(opts: BuildAppOptions): Promise<FastifyInstance> 
     presigner: opts.presigner ?? presignerFromEnv(env),
     maxBytes: env.UPLOAD_MAX_BYTES,
     allowedTypes: env.UPLOAD_ALLOWED_TYPES,
+  });
+
+  await app.register(projectRoutes, {
+    service: createProjectsService(createProjectsRepository(opts.db)),
   });
 
   const { closeDb } = opts;
