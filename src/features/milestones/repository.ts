@@ -1,6 +1,12 @@
 import { and, asc, eq, sql } from "drizzle-orm";
 import type { Db } from "../../db/client.js";
-import { type MilestoneRow, milestones, type TaskRow, tasks } from "../../db/schema/index.js";
+import {
+  type MilestoneRow,
+  type MilestoneStatus,
+  milestones,
+  type TaskRow,
+  tasks,
+} from "../../db/schema/index.js";
 
 /** Queries only. Every query filters by `org_id` and, where it applies, `project_id`. */
 export function createMilestonesRepository(db: Db) {
@@ -73,6 +79,31 @@ export function createMilestonesRepository(db: Db) {
         .where(inProject(orgId, projectId, id))
         .returning({ id: milestones.id });
       return rows.length > 0;
+    },
+
+    /**
+     * Compare-and-set: only moves a milestone that is still in `from`, so of two
+     * concurrent decisions exactly one gets a row back.
+     */
+    async setStatus(
+      orgId: string,
+      projectId: string,
+      id: string,
+      from: MilestoneStatus,
+      values: {
+        status: MilestoneStatus;
+        decidedBy: string | null;
+        decidedByName: string | null;
+        decidedAt: Date | null;
+        decisionNote: string | null;
+      }
+    ): Promise<MilestoneRow | null> {
+      const [row] = await db
+        .update(milestones)
+        .set(values)
+        .where(and(inProject(orgId, projectId, id), eq(milestones.status, from)))
+        .returning();
+      return row ?? null;
     },
 
     async idsOf(orgId: string, projectId: string): Promise<string[]> {

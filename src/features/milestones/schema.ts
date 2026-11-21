@@ -21,3 +21,6 @@ export const reorderBodySchema = z.object({ ids: z.array(z.uuid()) });
 
 export type CreateMilestoneBody = z.infer<typeof createMilestoneBodySchema>;
 export type UpdateMilestoneBody = z.infer<typeof updateMilestoneBodySchema>;
+
+export const decisionBodySchema = z.object({ note: z.string().max(1000).optional() });
+export type DecisionBody = z.infer<typeof decisionBodySchema>;

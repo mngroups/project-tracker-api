@@ -146,6 +146,7 @@ export const attachments = pgTable(
   (t) => [index("attachments_project_created_idx").on(t.projectId, t.createdAt.desc())]
 );
 
+export type MilestoneStatus = (typeof MILESTONE_STATUSES)[number];
 export type ProjectRow = typeof projects.$inferSelect;
 export type MilestoneRow = typeof milestones.$inferSelect;
 export type TaskRow = typeof tasks.$inferSelect;

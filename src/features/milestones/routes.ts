@@ -6,6 +6,7 @@ import { PERMISSIONS } from "../../permissions.js";
 import { idParamsSchema, milestoneSchema } from "../projects/schema.js";
 import {
   createMilestoneBodySchema,
+  decisionBodySchema,
   milestoneParamsSchema,
   reorderBodySchema,
   updateMilestoneBodySchema,
@@ -80,4 +81,27 @@ export const milestoneRoutes: FastifyPluginAsyncZod<{ service: MilestonesService
       reply.ok(await service.remove(callerOf(request.user), id, mid));
     }
   );
+
+  const decisions = [
+    ["submit", "submit", PERMISSIONS.manage],
+    ["approve", "approve", PERMISSIONS.milestoneApprove],
+    ["request-changes", "requestChanges", PERMISSIONS.milestoneApprove],
+  ] as const;
+  for (const [path, method, permission] of decisions) {
+    app.post(
+      `/v1/projects/:id/milestones/:mid/${path}`,
+      {
+        preHandler: app.requirePermission(permission),
+        schema: {
+          params: milestoneParamsSchema,
+          body: decisionBodySchema,
+          response: { 200: envelopeSchema(milestoneSchema) },
+        },
+      },
+      async (request, reply) => {
+        const { id, mid } = request.params;
+        reply.ok(await service[method](callerOf(request.user), id, mid, request.body));
+      }
+    );
+  }
 };
