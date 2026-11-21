@@ -53,8 +53,19 @@ export const envSchema = z
       .transform((value) => value === "true"),
     S3_ACCESS_KEY_ID: z.string().min(1).optional(),
     S3_SECRET_ACCESS_KEY: z.string().min(1).optional(),
-    UPLOAD_MAX_BYTES: int(10485760),
-    UPLOAD_ALLOWED_TYPES: list(["application/pdf", "image/jpeg", "image/png"]),
+    UPLOAD_MAX_BYTES: int(26214400),
+    UPLOAD_ALLOWED_TYPES: list([
+      "application/pdf",
+      "image/png",
+      "image/jpeg",
+      "image/webp",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/zip",
+      "text/plain",
+      "text/csv",
+    ]),
   })
   .superRefine((env, ctx) => {
     if (Boolean(env.S3_ACCESS_KEY_ID) !== Boolean(env.S3_SECRET_ACCESS_KEY)) {

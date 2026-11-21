@@ -22,7 +22,10 @@ import {
 } from "fastify-type-provider-zod";
 import type { Db } from "./db/client.js";
 import type { Env } from "./env.js";
+import { projectAttachmentRoutes } from "./features/attachments/project-routes.js";
+import { createAttachmentsRepository } from "./features/attachments/repository.js";
 import { attachmentRoutes } from "./features/attachments/routes.js";
+import { createAttachmentsService } from "./features/attachments/service.js";
 import { createMilestonesRepository } from "./features/milestones/repository.js";
 import { milestoneRoutes } from "./features/milestones/routes.js";
 import { createMilestonesService } from "./features/milestones/service.js";
@@ -134,8 +137,9 @@ export async function buildApp(opts: BuildAppOptions): Promise<FastifyInstance> 
   await app.register(health, { checks: { db: () => opts.db.execute(sql`select 1`) } });
   // #endregion
 
+  const presigner = opts.presigner ?? presignerFromEnv(env);
   await app.register(attachmentRoutes, {
-    presigner: opts.presigner ?? presignerFromEnv(env),
+    presigner,
     maxBytes: env.UPLOAD_MAX_BYTES,
     allowedTypes: env.UPLOAD_ALLOWED_TYPES,
   });
@@ -148,6 +152,15 @@ export async function buildApp(opts: BuildAppOptions): Promise<FastifyInstance> 
   });
   await app.register(taskRoutes, {
     service: createTasksService(createTasksRepository(opts.db), milestonesRepo, projectsRepo),
+  });
+
+  await app.register(projectAttachmentRoutes, {
+    service: createAttachmentsService(
+      createAttachmentsRepository(opts.db),
+      presigner,
+      milestonesRepo,
+      projectsRepo
+    ),
   });
 
   const { closeDb } = opts;

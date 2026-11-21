@@ -27,8 +27,8 @@ describe("loadEnv", () => {
       LOGIN_RATE_LIMIT_MAX: 10,
       TRUST_PROXY: false,
       S3_FORCE_PATH_STYLE: false,
-      UPLOAD_MAX_BYTES: 10485760,
-      UPLOAD_ALLOWED_TYPES: ["application/pdf", "image/jpeg", "image/png"],
+      UPLOAD_MAX_BYTES: 26214400,
+      UPLOAD_ALLOWED_TYPES: expect.arrayContaining(["application/pdf", "image/webp", "text/csv"]),
     });
   });
 
