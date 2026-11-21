@@ -4,6 +4,9 @@ export default defineConfig({
   test: {
     environment: "node",
     globals: true,
+    // PGlite migrations per test file are slow under parallel load.
+    testTimeout: 20_000,
+    hookTimeout: 20_000,
     include: ["{src,api,scripts}/**/__tests__/**/*.test.ts"],
     exclude: [...configDefaults.exclude, "dist/**"],
     coverage: {
