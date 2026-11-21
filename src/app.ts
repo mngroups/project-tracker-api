@@ -23,9 +23,6 @@ import {
 import type { Db } from "./db/client.js";
 import type { Env } from "./env.js";
 import { attachmentRoutes } from "./features/attachments/routes.js";
-import { createExamplesRepository } from "./features/examples/repository.js";
-import { exampleRoutes } from "./features/examples/routes.js";
-import { createExamplesService } from "./features/examples/service.js";
 
 /** App copy that complements the kit's `MESSAGES`. */
 export const MESSAGES_APP = {
@@ -87,7 +84,7 @@ export async function buildApp(opts: BuildAppOptions): Promise<FastifyInstance> 
   // #region handbook:app-wiring
   // Registered first so it sees every route (`pnpm openapi` writes the spec).
   await app.register(swagger, {
-    openapi: { info: { title: "Monexa API", version } },
+    openapi: { info: { title: "Project Tracker API", version } },
     transform: jsonSchemaTransform,
   });
   await app.register(requestId);
@@ -127,10 +124,6 @@ export async function buildApp(opts: BuildAppOptions): Promise<FastifyInstance> 
   });
   await app.register(health, { checks: { db: () => opts.db.execute(sql`select 1`) } });
   // #endregion
-
-  await app.register(exampleRoutes, {
-    service: createExamplesService(createExamplesRepository(opts.db)),
-  });
 
   await app.register(attachmentRoutes, {
     presigner: opts.presigner ?? presignerFromEnv(env),

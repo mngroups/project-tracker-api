@@ -1,7 +1,9 @@
 import { createDevIssuer, type DevIssuer } from "@mono/server-kit/dev";
 import { type Env, loadEnv } from "../env.js";
 
-export const CLIENT_ID = "monexa-app";
+export const CLIENT_ID = "project-tracker";
+export const ORG_A = "00000000-0000-4000-8000-00000000000a";
+export const ORG_B = "00000000-0000-4000-8000-00000000000b";
 export const CLIENT_SECRET = "dev-secret";
 export const REDIRECT = "http://localhost:3000/auth/callback";
 
@@ -9,10 +11,11 @@ export async function startTestIssuer(): Promise<DevIssuer> {
   const issuer = await createDevIssuer({
     users: [
       {
-        username: "admin",
-        password: "admin123",
+        username: "pm",
+        password: "pm123",
         sub: "user-1",
-        permissions: { [CLIENT_ID]: ["example:all"] },
+        permissions: { [CLIENT_ID]: ["project:all"] },
+        org: { id: ORG_A, name: "PT Contoh Klien" },
       },
     ],
     clients: [{ clientId: CLIENT_ID, clientSecret: CLIENT_SECRET, redirectUris: [REDIRECT] }],
@@ -38,8 +41,19 @@ export function testEnv(issuer: string, overrides: Record<string, string> = {}):
   });
 }
 
-export function tokenFor(issuer: DevIssuer, permissions: string[]): Promise<string> {
-  return issuer.signTestToken({ sub: "user-1", aud: CLIENT_ID, permissions });
+export function tokenFor(
+  issuer: DevIssuer,
+  permissions: string[],
+  opts: { orgId?: string | null; sub?: string; name?: string } = {}
+): Promise<string> {
+  const orgId = opts.orgId === undefined ? ORG_A : opts.orgId;
+  return issuer.signTestToken({
+    sub: opts.sub ?? "user-1",
+    aud: CLIENT_ID,
+    permissions,
+    ...(orgId === null ? {} : { org_id: orgId }),
+    ...(opts.name ? { name: opts.name } : {}),
+  });
 }
 
 export const bearer = (token: string) => ({ authorization: `Bearer ${token}` });

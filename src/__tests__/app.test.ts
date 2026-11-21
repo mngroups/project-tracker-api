@@ -2,7 +2,7 @@ import type { DevIssuer } from "@mono/server-kit/dev";
 import type { FastifyInstance } from "fastify";
 import { buildApp, MESSAGES_APP } from "../app.js";
 import { PERMISSIONS } from "../permissions.js";
-import { bearer, okDb, startTestIssuer, testEnv, tokenFor } from "./helpers.js";
+import { bearer, CLIENT_ID, okDb, startTestIssuer, testEnv, tokenFor } from "./helpers.js";
 
 let issuer: DevIssuer;
 const apps: FastifyInstance[] = [];
@@ -37,10 +37,10 @@ describe("buildApp", () => {
   it("guards routes with the central auth plugin", async () => {
     const a = await app();
     expect((await a.inject({ url: "/v1/auth/check" })).statusCode).toBe(401);
-    const token = await tokenFor(issuer, ["example:all"]);
+    const token = await tokenFor(issuer, ["project:all"]);
     const res = await a.inject({ url: "/v1/auth/check", headers: bearer(token) });
     expect(res.statusCode).toBe(200);
-    expect(res.json().data).toEqual({ user_id: "user-1", permissions: ["example:all"] });
+    expect(res.json().data).toEqual({ user_id: "user-1", permissions: ["project:all"] });
   });
 
   it("proxies credentials login to the issuer", async () => {
@@ -48,7 +48,7 @@ describe("buildApp", () => {
     const res = await a.inject({
       method: "POST",
       url: "/v1/auth/login",
-      payload: { username: "admin", password: "admin123" },
+      payload: { username: "pm", password: "pm123" },
     });
     expect(res.statusCode).toBe(200);
     expect(res.json().data.access_token).toEqual(expect.any(String));
@@ -95,7 +95,7 @@ describe("buildApp", () => {
       a.inject({
         method: "POST",
         url: "/v1/auth/login",
-        payload: { username: "admin", password: "admin123" },
+        payload: { username: "pm", password: "pm123" },
       });
     await login();
     await login();
@@ -127,15 +127,15 @@ describe("buildApp", () => {
     const a = await app({ LOGIN_RATE_LIMIT_MAX: "1" });
     const login = (username: string) =>
       a.inject({ method: "POST", url: "/v1/auth/login", payload: { username, password: "x" } });
-    await login("admin");
-    expect((await login("Admin")).statusCode).toBe(429);
-    expect((await login("viewer")).statusCode).not.toBe(429);
+    await login("pm");
+    expect((await login("PM")).statusCode).toBe(429);
+    expect((await login("member")).statusCode).not.toBe(429);
   });
 
   it("keys authenticated requests per user", async () => {
     const a = await app({ RATE_LIMIT_MAX: "1" });
-    const one = await issuer.signTestToken({ sub: "u-1", aud: "monexa-app", permissions: [] });
-    const two = await issuer.signTestToken({ sub: "u-2", aud: "monexa-app", permissions: [] });
+    const one = await issuer.signTestToken({ sub: "u-1", aud: CLIENT_ID, permissions: [] });
+    const two = await issuer.signTestToken({ sub: "u-2", aud: CLIENT_ID, permissions: [] });
     expect((await a.inject({ url: "/v1/auth/check", headers: bearer(one) })).statusCode).toBe(200);
     expect((await a.inject({ url: "/v1/auth/check", headers: bearer(one) })).statusCode).toBe(429);
     expect((await a.inject({ url: "/v1/auth/check", headers: bearer(two) })).statusCode).toBe(200);
@@ -167,8 +167,12 @@ describe("buildApp", () => {
 
   it("exposes the app's permission catalog", () => {
     expect(PERMISSIONS).toEqual({
-      exampleView: "example.item:view",
-      exampleCreate: "example.item:create",
+      view: "project:view",
+      manage: "project:manage",
+      taskUpdate: "project.task:update",
+      milestoneApprove: "project.milestone:approve",
+      attachmentUpload: "project.attachment:upload",
+      internalView: "project.internal:view",
     });
   });
 });

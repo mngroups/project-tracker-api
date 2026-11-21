@@ -1,6 +1,6 @@
-# Monexa API Template
+# Project Tracker API
 
-The backend half of a Monexa app. It pairs with `monexa-app-template`, the Next.js frontend. The stack is Fastify 5 on [`@mono/server-kit`](../mono-server-kit), with:
+The backend of the Project Tracker app, built from `monexa-api-template`. It pairs with the Next.js frontend in `project-tracker`. The stack is Fastify 5 on [`@mono/server-kit`](../mono-server-kit), with:
 - central OIDC auth, RBAC and the response envelope;
 - PostgreSQL + Drizzle;
 - Zod schemas as the single source for validation, serialization and OpenAPI;
@@ -25,17 +25,23 @@ pnpm db:migrate
 pnpm dev                     # http://localhost:8080
 ```
 
-To run it with the FE template, set `API_BASE_URL=http://localhost:8080` in its `.env` and log in as `admin` / `admin123`, which grants `example:all`. A second user, `viewer` / `viewer123`, has view-only access. Edit `dev/issuer.json` to add users or permissions.
+To run it with the FE template, set `API_BASE_URL=http://localhost:8080` in its `.env` and client `project-tracker`, log in as `pm` / `pm123` (Project Manager, `project:all`), `member` / `member123` (Team Member) or `client` / `client123` (Client). All belong to the dev org "PT Contoh Klien". Edit `dev/issuer.json` to add users or permissions.
+
+## Tenancy
+
+Every table has `org_id` and every query filters by the token's `org_id` (see `src/auth-context.ts`). A token without an org gets 403.
+
+> `@mono/server-kit` is installed from `vendor/mono-server-kit-0.2.0.tgz`; switch to `^0.2.0` from the registry once it is published.
 
 ## New app from this template
 
 1. Copy the repo and rename `name` in `package.json`.
 2. Register a client for the app in the central auth service and grant its permissions there.
-3. Set the env vars below, then delete or replace `src/features/examples`.
+3. Set the env vars below, then add your features under `src/features/`.
 
 ## Adding a feature
 
-Copy `src/features/examples`:
+Follow the layering below:
 
 | File            | Holds                                                            |
 | --------------- | ---------------------------------------------------------------- |

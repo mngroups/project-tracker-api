@@ -71,7 +71,9 @@ describe("POST /v1/attachments/presign", () => {
     const custom = await buildApp({
       env: testEnv(issuer.issuer()),
       db: okDb as never,
-      presigner: { presign: async () => ({ upload_uuid: "u-1", presign_url: "http://s3/x" }) },
+      presigner: {
+        presign: async () => ({ upload_uuid: "u-1", presign_url: "http://s3/x" }),
+      } as never,
     });
     const res = await custom.inject({
       method: "POST",

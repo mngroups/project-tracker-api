@@ -6,13 +6,7 @@ import { okDb } from "./helpers.js";
 
 type Spec = {
   info: { title: string; version: string };
-  paths: Record<
-    string,
-    Record<
-      string,
-      { requestBody?: { content: Record<string, { schema: { required?: string[] } }> } }
-    >
-  >;
+  paths: Record<string, Record<string, unknown>>;
 };
 
 async function spec(): Promise<Spec> {
@@ -25,15 +19,10 @@ async function spec(): Promise<Spec> {
 describe("OpenAPI", () => {
   it("documents the app's routes from their Zod schemas", async () => {
     const doc = await spec();
-    expect(doc.info).toEqual({ title: "Monexa API", version: "0.1.0" });
-    expect(Object.keys(doc.paths["/v1/examples"] ?? {})).toEqual(
-      expect.arrayContaining(["get", "post"])
-    );
+    expect(doc.info).toEqual({ title: "Project Tracker API", version: "0.1.0" });
     expect(doc.paths["/v1/attachments/presign"]?.post).toBeDefined();
     expect(doc.paths["/v1/auth/check"]?.get).toBeDefined();
     expect(doc.paths["/health"]?.get).toBeDefined();
-    const body = doc.paths["/v1/examples"]?.post?.requestBody?.content["application/json"]?.schema;
-    expect(body?.required).toContain("name");
   });
 
   it("matches the committed openapi/openapi.json (run `pnpm openapi` after changing routes)", async () => {

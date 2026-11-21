@@ -1,4 +1,4 @@
-# Monexa API: agent guide
+# Project Tracker API: agent guide
 
 Fastify 5 backend on `@mono/server-kit` (read its README for the plugin options). ESM, TypeScript (NodeNext), Node 24, pnpm 10.33.0. Postgres via Drizzle. See `README.md` for setup.
 
@@ -14,7 +14,8 @@ Fastify 5 backend on `@mono/server-kit` (read its README for the plugin options)
 
 ## Rules
 
-- New features copy `src/features/examples`: routes → service → repository.
+- Every table has `org_id`; every query filters by it (use `callerOf(request.user)` from `src/auth-context.ts`). Another org's resource answers 404.
+- Features follow routes → service → repository under `src/features/<name>/`.
   - Services never import Fastify. Repositories hold queries only. A test enforces this.
 - Every route declares Zod request **and** response schemas.
 - Handlers call `reply.ok(...)` and never `return reply.ok(...)` (it's a type error with a response schema). Expected failures throw the kit's `AppError` with Indonesian copy.

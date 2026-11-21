@@ -1,21 +1,43 @@
 {
   "users": [
     {
-      "username": "admin",
-      "password": "admin123",
-      "sub": "dev-admin",
-      "permissions": { "monexa-app": ["example:all"] }
+      "username": "pm",
+      "password": "pm123",
+      "sub": "dev-pm",
+      "permissions": { "project-tracker": ["project:all"] },
+      "org": { "id": "00000000-0000-4000-8000-00000000000a", "name": "PT Contoh Klien" }
     },
     {
-      "username": "viewer",
-      "password": "viewer123",
-      "sub": "dev-viewer",
-      "permissions": { "monexa-app": ["example.item:view"] }
+      "username": "member",
+      "password": "member123",
+      "sub": "dev-member",
+      "permissions": {
+        "project-tracker": [
+          "project:view",
+          "project.task:update",
+          "project.attachment:upload",
+          "project.internal:view"
+        ]
+      },
+      "org": { "id": "00000000-0000-4000-8000-00000000000a", "name": "PT Contoh Klien" }
+    },
+    {
+      "username": "client",
+      "password": "client123",
+      "sub": "dev-client",
+      "permissions": {
+        "project-tracker": [
+          "project:view",
+          "project.milestone:approve",
+          "project.attachment:upload"
+        ]
+      },
+      "org": { "id": "00000000-0000-4000-8000-00000000000a", "name": "PT Contoh Klien" }
     }
   ],
   "clients": [
     {
-      "clientId": "monexa-app",
+      "clientId": "project-tracker",
       "clientSecret": "dev-secret",
       "redirectUris": ["http://localhost:3000/auth/callback"]
     }
