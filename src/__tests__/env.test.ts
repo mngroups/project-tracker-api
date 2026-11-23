@@ -81,8 +81,9 @@ describe("loadEnv", () => {
   });
 
   it("treats empty values as unset", () => {
-    const env = loadEnv({ ...minimal, AUTH_IDP_HINT: "", PORT: "" });
+    const env = loadEnv({ ...minimal, AUTH_IDP_HINT: "", AUTH_ORG_HINT: "", PORT: "" });
     expect(env.AUTH_IDP_HINT).toBeUndefined();
+    expect(env.AUTH_ORG_HINT).toBeUndefined();
     expect(env.PORT).toBe(8080);
   });
 

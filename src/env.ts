@@ -32,6 +32,9 @@ export const envSchema = z
     AUTH_CLIENT_SECRET: z.string().min(1),
     AUTH_REDIRECT_URIS: list(),
     AUTH_IDP_HINT: z.string().min(1).optional(),
+    // sso only: an org slug sent as org_hint, which brands the central login page. Leave it
+    // unset when one deployment serves several client orgs (staff switch between them).
+    AUTH_ORG_HINT: z.string().min(1).optional(),
     AUTH_POST_LOGOUT_REDIRECT_URI: z.url().optional(),
 
     CORS_ORIGINS: list(),

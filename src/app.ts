@@ -132,6 +132,7 @@ export async function buildApp(opts: BuildAppOptions): Promise<FastifyInstance> 
     clientSecret: env.AUTH_CLIENT_SECRET,
     redirectUris: env.AUTH_REDIRECT_URIS,
     idpHint: env.AUTH_IDP_HINT,
+    orgHint: env.AUTH_ORG_HINT,
     postLogoutRedirectUri: env.AUTH_POST_LOGOUT_REDIRECT_URI,
   });
   await app.register(health, { checks: { db: () => opts.db.execute(sql`select 1`) } });

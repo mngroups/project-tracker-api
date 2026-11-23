@@ -93,6 +93,157 @@
         }
       }
     },
+    "/v1/auth/switch-org": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refresh_token": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "org_id": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "refresh_token",
+                  "org_id"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "number"
+                    },
+                    "request_id": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "timestamp": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "access_token": {
+                          "type": "string"
+                        },
+                        "refresh_token": {
+                          "type": "string"
+                        },
+                        "expires_in": {
+                          "type": "number"
+                        },
+                        "refresh_expires_in": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "access_token",
+                        "refresh_token",
+                        "expires_in",
+                        "refresh_expires_in"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "code",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/orgs": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "number"
+                    },
+                    "request_id": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "timestamp": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "code",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/auth/logout": {
       "post": {
         "requestBody": {
@@ -156,11 +307,29 @@
                           "items": {
                             "type": "string"
                           }
+                        },
+                        "org": {
+                          "nullable": true,
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name"
+                          ],
+                          "additionalProperties": false
                         }
                       },
                       "required": [
                         "user_id",
-                        "permissions"
+                        "permissions",
+                        "org"
                       ],
                       "additionalProperties": false
                     }
@@ -193,6 +362,10 @@
                     "minLength": 1
                   },
                   "password": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "org_id": {
                     "type": "string",
                     "minLength": 1
                   }
