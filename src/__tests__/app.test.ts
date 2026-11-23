@@ -40,7 +40,7 @@ describe("buildApp", () => {
     const token = await tokenFor(issuer, ["project:all"]);
     const res = await a.inject({ url: "/v1/auth/check", headers: bearer(token) });
     expect(res.statusCode).toBe(200);
-    expect(res.json().data).toEqual({ user_id: "user-1", permissions: ["project:all"] });
+    expect(res.json().data).toEqual({ user_id: "user-1", permissions: ["project:all"], org: null });
   });
 
   it("proxies credentials login to the issuer", async () => {
@@ -59,13 +59,16 @@ describe("buildApp", () => {
       AUTH_MODE: "sso",
       AUTH_REDIRECT_URIS: "http://localhost:3000/auth/callback",
       AUTH_IDP_HINT: "google",
+      AUTH_ORG_HINT: "pt-maju",
       AUTH_POST_LOGOUT_REDIRECT_URI: "http://localhost:3000/login",
     });
     const res = await a.inject({
       url: `/v1/auth/authorize-url?redirect_uri=${encodeURIComponent("http://localhost:3000/auth/callback")}`,
     });
     expect(res.statusCode).toBe(200);
-    expect(new URL(res.json().data.url).searchParams.get("kc_idp_hint")).toBe("google");
+    const authorize = new URL(res.json().data.url).searchParams;
+    expect(authorize.get("kc_idp_hint")).toBe("google");
+    expect(authorize.get("org_hint")).toBe("pt-maju");
     const out = await a.inject({ method: "POST", url: "/v1/auth/logout" });
     expect(
       new URL(out.json().data.end_session_url).searchParams.get("post_logout_redirect_uri")
