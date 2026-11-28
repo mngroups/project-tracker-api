@@ -18,8 +18,8 @@ Registry access is the same as in the FE template:
 
 ```bash
 pnpm registry:run install    # or: pnpm registry:run add <pkg>
-docker compose up -d         # Postgres :5432, RustFS (S3) :9002 (console :9003), bucket monexa-dev + CORS
-pnpm dev:issuer              # stand-in for the central auth service on :9000
+docker compose up -d         # Postgres :5433, RustFS (S3) :9002 (console :9003), bucket monexa-dev + CORS
+pnpm dev:issuer              # stand-in for the central auth service on :9000 (skip it when monexa-auth runs: same port)
 cp .env.example .env
 pnpm db:migrate
 pnpm dev                     # http://localhost:8080
