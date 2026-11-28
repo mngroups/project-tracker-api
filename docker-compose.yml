@@ -7,30 +7,43 @@ services:
       POSTGRES_USER: monexa
       POSTGRES_PASSWORD: monexa
       POSTGRES_DB: monexa
-    ports: ["5432:5432"]
+    # 5433 on the host: monexa-auth's Postgres already uses 5432.
+    ports: ["5433:5432"]
     volumes: [postgres-data:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U monexa"]
       interval: 5s
       retries: 10
 
-  minio:
-    image: minio/minio
-    command: server /data --console-address ":9003"
+  # S3-compatible storage. MinIO no longer publishes community images, so local dev
+  # uses RustFS (MinIO-compatible API, incl. presigned POST and bucket CORS).
+  storage:
+    image: rustfs/rustfs:1.0.6
     environment:
-      MINIO_ROOT_USER: minio
-      MINIO_ROOT_PASSWORD: minio12345
-    ports: ["9002:9000", "9003:9003"]
-    volumes: [minio-data:/data]
+      RUSTFS_ACCESS_KEY: minio
+      RUSTFS_SECRET_KEY: minio12345
+    ports: ["9002:9000", "9003:9001"]
+    volumes: [storage-data:/data]
 
-  minio-setup:
-    image: minio/mc
-    depends_on: [minio]
+  # Creates the bucket and lets the browser upload to it from the FE origin.
+  storage-setup:
+    image: amazon/aws-cli:latest
+    depends_on: [storage]
     restart: "no"
-    entrypoint: >
-      /bin/sh -c "until mc alias set local http://minio:9000 minio minio12345; do sleep 1; done;
-      mc mb --ignore-existing local/monexa-dev"
+    environment:
+      AWS_ACCESS_KEY_ID: minio
+      AWS_SECRET_ACCESS_KEY: minio12345
+      AWS_DEFAULT_REGION: us-east-1
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        s3="aws --endpoint-url http://storage:9000 s3api"
+        until $$s3 list-buckets >/dev/null 2>&1; do sleep 1; done
+        $$s3 create-bucket --bucket monexa-dev >/dev/null 2>&1 || true
+        $$s3 put-bucket-cors --bucket monexa-dev --cors-configuration \
+          '{"CORSRules":[{"AllowedOrigins":["*"],"AllowedMethods":["GET","POST","PUT","HEAD"],"AllowedHeaders":["*"],"ExposeHeaders":["ETag"]}]}'
+        echo "bucket monexa-dev ready"
 
 volumes:
   postgres-data:
-  minio-data:
+  storage-data:

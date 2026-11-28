@@ -5,6 +5,6 @@ export default defineConfig({
   schema: "./src/db/schema/index.ts",
   out: "./src/db/migrations",
   dbCredentials: {
-    url: process.env.DATABASE_URL ?? "postgres://monexa:monexa@localhost:5432/monexa",
+    url: process.env.DATABASE_URL ?? "postgres://monexa:monexa@localhost:5433/monexa",
   },
 });

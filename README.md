@@ -18,8 +18,8 @@ Registry access is the same as in the FE template:
 
 ```bash
 pnpm registry:run install    # or: pnpm registry:run add <pkg>
-docker compose up -d         # Postgres :5432, MinIO :9002 (console :9003), bucket monexa-dev
-pnpm dev:issuer              # stand-in for the central auth service on :9000
+docker compose up -d         # Postgres :5433, RustFS (S3) :9002 (console :9003), bucket monexa-dev + CORS
+pnpm dev:issuer              # stand-in for the central auth service on :9000 (skip it when monexa-auth runs: same port)
 cp .env.example .env
 pnpm db:migrate
 pnpm dev                     # http://localhost:8080
@@ -73,7 +73,7 @@ In routes that have a response schema, **call** `reply.ok(...)` and don't `retur
 | `RATE_LIMIT_MAX` / `LOGIN_RATE_LIMIT_MAX`             | `300` / `10`                           | Per minute. Keyed by user when authenticated, by username on `/v1/auth/login`, and by client IP otherwise. The login limit also covers `/v1/auth/callback`. `/health` and `/ready` are never limited |
 | `TRUST_PROXY`                                         | `false`                                | Set to `true` behind a proxy that sets `X-Forwarded-For` (load balancer, Vercel), so anonymous limits use the real client IP                                                                         |
 | `S3_BUCKET`, `S3_REGION`                              | required                               |                                                                                                                                                                                                      |
-| `S3_ENDPOINT`, `S3_FORCE_PATH_STYLE`                  | – / `false`                            | For S3-compatible storage such as MinIO                                                                                                                                                              |
+| `S3_ENDPOINT`, `S3_FORCE_PATH_STYLE`                  | – / `false`                            | For S3-compatible storage such as RustFS                                                                                                                                                             |
 | `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`            | –                                      | Set both or neither. With neither, the AWS credential chain is used                                                                                                                                  |
 | `UPLOAD_MAX_BYTES`, `UPLOAD_ALLOWED_TYPES`            | `26214400`, PDF/images/Office/zip/text | Limits for presigned uploads                                                                                                                                                                         |
 
